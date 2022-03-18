@@ -40,7 +40,7 @@ There are 2 parts:
 - byarticle: Labeled through crowdsourcing on an article basis. The data contains only articles for which a consensus among the crowdsourcing workers existed.
 - bypublisher: Labeled by the overall bias of the publisher as provided by BuzzFeed journalists or MediaBiasFactCheck.com.
 """
-_URL_BASE = "https://zenodo.org/record/1489920/files/"
+_URL_BASE = "https://zenodo.org/record/5776081/files/"
 
 
 class HyperpartisanNewsDetection(datasets.GeneratorBasedBuilder):
@@ -104,11 +104,19 @@ class HyperpartisanNewsDetection(datasets.GeneratorBasedBuilder):
                 "articles_file": _URL_BASE + "articles-training-" + self.config.name + "-20181122.zip?download=1",
                 "labels_file": _URL_BASE + "ground-truth-training-" + self.config.name + "-20181122.zip?download=1",
             },
+            datasets.Split.TEST: {
+                "articles_file": _URL_BASE + "articles-test-" + self.config.name + "-20181207.zip?download=1",
+                "labels_file": _URL_BASE + "ground-truth-test-" + self.config.name + "-20181207.zip?download=1",
+            },
         }
         if self.config.name == "bypublisher":
             urls[datasets.Split.VALIDATION] = {
-                "articles_file": _URL_BASE + "articles-training-" + self.config.name + "-20181122.zip?download=1",
-                "labels_file": _URL_BASE + "ground-truth-training-" + self.config.name + "-20181122.zip?download=1",
+                "articles_file": _URL_BASE + "articles-validation-" + self.config.name + "-20181122.zip?download=1",
+                "labels_file": _URL_BASE + "ground-truth-validation-" + self.config.name + "-20181122.zip?download=1",
+            }
+            urls[datasets.Split.TEST] = {
+                "articles_file": _URL_BASE + "articles-test-" + self.config.name + "-20181212.zip?download=1",
+                "labels_file": _URL_BASE + "ground-truth-test-" + self.config.name + "-20181212.zip?download=1",
             }
 
         data_dir = {}
