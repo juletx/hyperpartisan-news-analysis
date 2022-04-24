@@ -19,7 +19,10 @@
 
 import os
 import textwrap
-import xml.etree.ElementTree as ET
+import string
+from lxml import etree
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 
 import datasets
 
@@ -42,7 +45,10 @@ There are 2 parts:
 """
 _URL_BASE = "https://zenodo.org/record/5776081/files/"
 
-
+PUNCTUATION = string.punctuation + "‘’“”«»–…•"
+STOPWORDS = set(stopwords.words('english'))
+ENTITIES = set(["lt", "amp", "gt", "quot", "apos"])
+IMAGE = set(["img", "alt", "src", "width", "height", "https", "datarecalcdims", "aligncenter"])
 class HyperpartisanNewsDetection(datasets.GeneratorBasedBuilder):
     """Hyperpartisan News Detection Dataset."""
 
@@ -78,7 +84,9 @@ class HyperpartisanNewsDetection(datasets.GeneratorBasedBuilder):
 
     def _info(self):
         features = {
+            "id": datasets.Value("string"),
             "text": datasets.Value("string"),
+            "clean_text": datasets.Value("string"),
             "title": datasets.Value("string"),
             "hyperpartisan": datasets.Value("bool"),
             "url": datasets.Value("string"),
@@ -130,31 +138,71 @@ class HyperpartisanNewsDetection(datasets.GeneratorBasedBuilder):
             splits.append(datasets.SplitGenerator(name=split, gen_kwargs=data_dir[split]))
         return splits
 
+    def _clean_text(self, text):
+        """Tokenize text, convert words to lowercase, remove puntuation,
+        numbers, stop words, xml entities and image tags.
+
+        Args:
+            text (str): text to be cleaned
+
+        Returns:
+            str: cleaned text
+        """
+        # split into tokens
+        words = word_tokenize(text)
+        # convert to lower case and remove punctuation
+        table = str.maketrans('', '', PUNCTUATION)
+        words = [str.lower(word.translate(table)) for word in words]
+        # remove numbers, stop words, xml entities and image tags
+        words = [word for word in words if word.isalpha() and word not in STOPWORDS | ENTITIES | IMAGE]
+        # join words to string
+        text = " ".join(words)
+        # remove extra whitespace
+        text = " ".join(text.split())
+        # strip whitespace at start and end
+        text = text.strip()
+        return text
+
+    def _get_class_dict(self, class_tree):
+        """Get dictionary of article ids and their hyperpartisan class.
+
+        Args:
+            class_tree (xml.etree.ElementTree): class xml document tree
+
+        Returns:
+            dict: dictionary of article ids, class, bias and url
+        """
+        class_dict = {}
+        for article in class_tree.xpath("/articles/article"):
+            labels = {"hyperpartisan": article.get("hyperpartisan") == "true",
+                        "url": article.get("url")}
+            if self.config.name == "bypublisher":
+                labels["bias"] = article.get("bias")
+            class_dict[article.get("id")] = labels
+        return class_dict
+
     def _generate_examples(self, articles_file=None, labels_file=None):
         """Yields examples."""
-        labels = {}
-        with open(labels_file, "rb") as f_labels:
-            tree = ET.parse(f_labels)
-            root = tree.getroot()
-            for label in root:
-                article_id = label.attrib["id"]
-                del label.attrib["labeled-by"]
-                labels[article_id] = label.attrib
 
-        with open(articles_file, "rb") as f_articles:
-            tree = ET.parse(f_articles)
-            root = tree.getroot()
-            for idx, article in enumerate(root):
-                example = {}
-                example["title"] = article.attrib["title"]
-                example["published_at"] = article.attrib.get("published-at", "")
-                example["id"] = article.attrib["id"]
-                example = {**example, **labels[example["id"]]}
-                example["hyperpartisan"] = example["hyperpartisan"] == "true"
+        # discard whitespace nodes
+        parser = etree.XMLParser(remove_blank_text=True)
 
-                example["text"] = ""
-                for child in article:
-                    example["text"] += ET.tostring(child).decode() + "\n"
-                example["text"] = example["text"].strip()
-                del example["id"]
-                yield idx, example
+        # parse article document
+        article_tree = etree.parse(articles_file, parser)
+
+        # parse class document
+        class_tree = etree.parse(labels_file, parser)
+
+        # get class dict
+        class_dict = self._get_class_dict(class_tree)
+
+        # yield examples
+        for idx, article in enumerate(article_tree.xpath("/articles/article")):
+            example = {}
+            example["id"] = article.get("id")
+            example["title"] = article.get("title")
+            example["published_at"] = article.get("published-at", "")
+            example = {**example, **class_dict[example["id"]]}
+            example["text"] = article.xpath("string(.)")
+            example["clean_text"] = self._clean_text(example["text"])
+            yield idx, example
