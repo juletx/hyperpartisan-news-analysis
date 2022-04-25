@@ -1,8 +1,9 @@
-Data for PAN at SemEval 2019 Task 4: Hyperpartisan News Detection
-=================================================================
+# Data for PAN at SemEval 2019 Task 4: Hyperpartisan News Detection
 
 Task: https://webis.de/events/semeval-19/
-Dataset: https://webis.de/data.html#pan-semeval-hyperpartisan-news-detection-19 | https://doi.org/10.5281/zenodo.1489920
+
+Dataset: https://webis.de/data.html#pan-semeval-hyperpartisan-news-detection-19 | https://doi.org/10.5281/zenodo.5776081
+
 Paper: https://webis.de/publications.html#kiesel_2019c
 
 Training, validation, and test data for the PAN @ SemEval 2019 Task 4: Hyperpartisan News Detection.
@@ -20,4 +21,3 @@ Moreover, filenames containing "meta" contain data for the respective meta-class
 The collection (including labels) are licensed under a Creative Commons Attribution 4.0 International License.
 
 Acknowledgements: Thanks to Jonathan Miller for his assistance in cleaning the data!
-
