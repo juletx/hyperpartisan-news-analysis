@@ -38,7 +38,7 @@
 
 \newcommand\BibTeX{B\textsc{ib}\TeX}
 
-\title{Hyperpartisan News Analysis With Scattertext}
+\title{Hyperpartisan News Analysis With Scattertext and Log-odd Ratio}
 
 \author{Julen Etxaniz \\
   University of the Basque Country \\
@@ -52,7 +52,7 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-
+Hyperpartisan news are those that exhibit blind, prejudiced, or unreasoning allegiance to one party, faction, cause, or person. We use SemEval hyperpartisan news detection data to extract the most relevant words of hyperpartisan and non-hyperpartisan documents. We obtain similar results using log-odd ratios and Scattertext, which show that different words are used in each hyperpartisan news. We also compare the results obtained using the original text and preprocessed text.
 \end{abstract}
 
 \section{Introduction}
@@ -61,7 +61,7 @@ Hyperpartisan news are those that take an extreme left-wing or right-wing standp
 
 The purpose of this work is to analyze the usage of words in documents which are hyperpartisan and non-hyperpartisan. Hyperpartisan news are those that exhibit blind, prejudiced, or unreasoning allegiance to one party, faction, cause, or person.
 
-Whereas the task on semeval was to design a system to automatically detect hyperpartisan news, in this exercise we are going to exploit both corpora and analyze which terms are the most relevant in each of the sets.
+Whereas the task on SemEval was to design a system to automatically detect hyperpartisan news, in this work we are going to exploit both corpora and analyze which terms are the most relevant in each of the sets.
 
 We use two different methods for analysing hyperpartisan and non-hyperpartisan documents. First, we calculate log-odd ratios to extract the most relevant words of each category. Then, we use Scattertext \cite{kessler2017scattertext} to build an interactive HTML scatter plot. We compare the results of each method and extract some conclusions.
 
@@ -83,17 +83,17 @@ The second part of the data is labeled through crowdsourcing on an article basis
 
 \section{Methods}
 
-First, we preprocess the original data to get better results in the analysis. Then, we use two different methods for analysing hyperpartisan and non-hyperpartisan documents. On the one hand, we calculate log-odd ratios to extract the most relevant words of each category. On the other hand, we use Scattertext \cite{kessler2017scattertext} to build an interactive HTML scatter plot. Code is available at GitHub: \footnote{\url{https://github.com/juletx/hyperpartisan-news-detection}}
+First, we preprocess the original data to get better results in the analysis. Then, we use two different methods for analysing hyperpartisan and non-hyperpartisan documents. On the one hand, we calculate log-odd ratios to extract the most relevant words of each category. On the other hand, we use Scattertext \cite{kessler2017scattertext} to build an interactive HTML scatter plot. All the code is available at GitHub: \footnote{\url{https://github.com/juletx/hyperpartisan-news-detection}}
 
 \subsection{Preprocessing}
 \label{Preprocessing}
 As the original files are XML files, we have to preprocess them in order to obtain good insights. First we use the \texttt{lxml} library in python to analyze the XML documents and extract the necessary information. Preprocessing also includes tokenizing, converting words to lowercase, removing punctuation, numbers, stop words, extra whitespaces, XML entities and image tags.
 
-To calculate the log-odd ratios, we select the validation set of the By Publisher dataset that contains 150,000 articles. The first step is to generate two text files for hyperpartisan and non-hyperpartisan news articles, respectively. We have to divide the news articles contained in the validation XML file, according to their ground truth value.
+To calculate the log-odd ratios, we select the validation set of the By Publisher Dataset that contains 150,000 articles. The first step is to generate two text files for hyperpartisan and non-hyperpartisan news articles, respectively. We have to divide the news articles contained in the validation XML file, according to their ground truth value.
 
-For scattertext, we select the test set of the By Article Dataset, which contains 628 articles. Scattertext needs a smaller number of articles because otherwise the interactive site takes very long to load. This size is big enough to extract the most relevant words.
+For Scattertext, we select the test set of the By Article Dataset, which contains 628 articles. Scattertext needs a smaller number of articles because otherwise the interactive site takes very long to load. This size is big enough to extract the most relevant words.
 
-\subsection{Log-odd ratio}
+\subsection{Log-odd Ratio}
 
 After preprocessing text files, we extract the log-odd ratios of each word. Because the log-odd ratio is sensitive to infrequent words, we discard words that appear less than 20 times in the corpus. We also extract the log-odd ratios of the bigrams in the corpus. Having the log-odd ratios, we can extract the most relevant 50 words and bigrams in hyperpartisan and non-hyperpartisan documents. If we analyze these words, we can draw some conclusions about hyperpartisan news.
 
@@ -105,54 +105,6 @@ $$o_w^{(i)} = \frac{p_w^{(i)}}{1-p_w^{(i)}}; o_w^{(j)} = \frac{p_w^{(j)}}{1-p_w^
 $$r_w = \log{o_w^{(i)}} - \log{o_w^{(j)}}$$
 
 where $f_w^{(i)}$ is the frequency of word $w$ in group $i$ (hyperpartisan or non-hyperpartisan), and $N^{(i)}$ is the number of words in group $i$.
-
-\subsection{Scattertext}
-
-Scattertext \cite{kessler2017scattertext} is a tool for finding distinguishing terms in corpora and displaying them in an interactive HTML scatter plot. It is intended for visualizing what words and phrases are more characteristic of a category than others. We can use it to compare hyperpartisan and non-hyperpartisan news. It also gives the terms which occur frequently in all sets of documents being studied (both categories), but relatively infrequent compared to general term frequencies.
-
-Scattertext uses a metric called Scaled F-Score to rank terms. Associated terms have a high category-specific precision and category-specific term frequency. The harmonic mean of precision and frequency is taken to ensure that both are high. Two adjustments are made to come up with the final formulation of Scaled F-Score.
-
-Given a word $w_i \in W$ and a category $c_j \in C$, define the precision of the word $w_i$ with regard to a category as:
-$$ \mbox{prec}(i,j) = \frac{\#(w_i, c_j)}{\sum_{c \in C} \#(w_i, c)}. $$
-
-The function $\#(w_i, c_j)$ represents either the number of times $w_i$ occurs in a document labeled with the category $c_j$ or the number of documents labeled $c_j$ which contain $w_i$.
-
-Similarly, define the frequency a word occurs in the category as:
-$$ \mbox{freq}(i, j) = \frac{\#(w_i, c_j)}{\sum_{w \in W} \#(w, c_j)}. $$
-The harmonic mean of these two values of these two values is defined as:
-$$ \mathcal{H}_\beta(i,j) = (1 + \beta^2) \frac{\mbox{prec}(i,j) \cdot \mbox{freq}(i,j)}{\beta^2 \cdot \mbox{prec}(i,j) + \mbox{freq}(i,j)}. $$
-$\beta \in \mathcal{R}^+$ is a scaling factor where frequency is favored if $\beta < 1$, precision if $\beta > 1$, and both are equally weighted if $\beta = 1$. F-Score is equivalent to the harmonic mean where $\beta = 1$.
-
-The first problem of the previous formulation is that harmonic means are dominated by precision. To solve this we take the normal CDF of precision and frequency percentage scores, which will be scaled between 0 and 1.
-
-Define the the Normal CDF as:
-$$ \Phi(z) = \int_{-\infty}^z \mathcal{N}(x; \mu, \sigma^2)\ \mathrm{d}x.$$
-
-Where $ \mathcal{N} $ is the PDF of the Normal distribution, $\mu$ is the mean, and $\sigma^2$ is the variance. $\Phi$ is used to scale and standardize the precisions and frequencies, and place them on the same scale $[0,1]$.
-
-Now we can define Scaled F-Score as the harmonic mean of the Normal CDF transformed frequency and precision:
-$$ \mbox{S-CAT}_{\beta}(i, j) = \mathcal{H}_{\beta}(\Phi(\mbox{prec}(i, j)), \Phi(\mbox{freq}(i, j))).$$
-$\mu$ and $\sigma^2$ are defined separately as the mean and variance of precision and frequency.
-A $\beta$ of 2 is recommended and is the default value in Scattertext.
-
-Note that any function with the range of $[0,1]$ can be used in place of $\Phi$.  Also, when the precision is very small normalization may be foregone.
-
-The second adjustment consists of making the score fair for negative scoring terms. For this we compute the Scaled F-Score of the negative class. If that score has a higher magnitude than the positive one, we keep that value as a negative score.
-
-Note that the range of $\mathcal{S}$ is now $[-1, 1]$, where $\mathcal{S} < 0$ indicates a term less associated with the category is question than average, and a positive score being more associated.
-
-\section{Results}
-
-The results we get by extracting the words relevant words using log-odd ratios and using Scattertext are different.
-
-\subsection{Using log-odd ratios}
-
-We get relevant words and bigrams from hyperpartisan and non-hyperpartisan articles by calculating their log-odd ratio.
-
-\subsubsection{Relevant Words}
-
-There are many differences betweeen the 50 most relevant words of
-hyperpartisan and non-hyperpartisan news. Here are the main findings of each class. Table \ref{tab:words_bigrams} shows all words and bigrams.
 
 \begin{table*}[ht]
 \centering
@@ -208,11 +160,81 @@ slager            & inaudible         & divestment  & sanctions   & chinese     
 shall             & ph                & support     & continue    & think         & china        \\
 zionists          & odinga            & america     & health      & southeast     & asia         \\
 teabaggers        & bretton           & mr          & comey       & fort          & worth        \\
-shep              & hu                & romney      & tax         & african       & national     \\ \bottomrule
+shep              & hu                & romney      & tax         & african       & national     \\ 
+\bottomrule
 \end{tabular}
 \caption{Most relevant hyperpartisan and non-hyperpartisan words and bigrams according to log-odd ratios.}
 \label{tab:words_bigrams}
 \end{table*}
+
+\subsection{Scattertext}
+
+Scattertext \cite{kessler2017scattertext} is a tool for finding distinguishing terms in corpora and displaying them in an interactive HTML scatter plot. It is intended for visualizing what words and phrases are more characteristic of a category than others. We can use it to compare hyperpartisan and non-hyperpartisan news. It also gives the terms which occur frequently in all sets of documents being studied (both categories), but relatively infrequent compared to general term frequencies. And for each word, we can compare its frequency (per term and per word) in each category and some example of mentions.
+
+Scattertext uses a metric called Scaled F-Score to rank terms. Associated terms have a high category-specific precision and category-specific term frequency. The harmonic mean of precision and frequency is taken to ensure that both are high. Two adjustments are made to come up with the final formulation of Scaled F-Score.
+
+Given a word $w_i \in W$ and a category $c_j \in C$, define the precision of the word $w_i$ with regard to a category as:
+$$ \mbox{prec}(i,j) = \frac{\#(w_i, c_j)}{\sum_{c \in C} \#(w_i, c)}. $$
+
+The function $\#(w_i, c_j)$ represents either the number of times $w_i$ occurs in a document labeled with the category $c_j$ or the number of documents labeled $c_j$ which contain $w_i$.
+
+Similarly, define the frequency a word occurs in the category as:
+$$ \mbox{freq}(i, j) = \frac{\#(w_i, c_j)}{\sum_{w \in W} \#(w, c_j)}. $$
+The harmonic mean of these two values of these two values is defined as:
+$$ \mathcal{H}_\beta(i,j) = (1 + \beta^2) \frac{\mbox{prec}(i,j) \cdot \mbox{freq}(i,j)}{\beta^2 \cdot \mbox{prec}(i,j) + \mbox{freq}(i,j)}. $$
+$\beta \in \mathcal{R}^+$ is a scaling factor where frequency is favored if $\beta < 1$, precision if $\beta > 1$, and both are equally weighted if $\beta = 1$. F-Score is equivalent to the harmonic mean where $\beta = 1$.
+
+The first problem of the previous formulation is that harmonic means are dominated by precision. To solve this we take the normal CDF of precision and frequency percentage scores, which will be scaled between 0 and 1.
+
+Define the the Normal CDF as:
+$$ \Phi(z) = \int_{-\infty}^z \mathcal{N}(x; \mu, \sigma^2)\ \mathrm{d}x.$$
+
+Where $ \mathcal{N} $ is the PDF of the Normal distribution, $\mu$ is the mean, and $\sigma^2$ is the variance. $\Phi$ is used to scale and standardize the precisions and frequencies, and place them on the same scale $[0,1]$.
+
+Now we can define Scaled F-Score as the harmonic mean of the Normal CDF transformed frequency and precision:
+$$ \mbox{S-CAT}_{\beta}(i, j) = \mathcal{H}_{\beta}(\Phi(\mbox{prec}(i, j)), \Phi(\mbox{freq}(i, j))).$$
+$\mu$ and $\sigma^2$ are defined separately as the mean and variance of precision and frequency.
+A $\beta$ of 2 is recommended and is the default value in Scattertext.
+
+Note that any function with the range of $[0,1]$ can be used in place of $\Phi$.  Also, when the precision is very small normalization may be foregone.
+
+The second adjustment consists of making the score fair for negative scoring terms. For this we compute the Scaled F-Score of the negative class. If that score has a higher magnitude than the positive one, we keep that value as a negative score.
+
+Note that the range of $\mathcal{S}$ is now $[-1, 1]$, where $\mathcal{S} < 0$ indicates a term less associated with the category is question than average, and a positive score being more associated.
+
+\section{Results}
+
+In this section, we will comment and compare the results get by extracting the most relevant words using log-odd ratios and using Scattertext.
+
+\begin{figure*}[ht]
+    \centering
+    \href{https://juletx.github.io/hyperpartisan-news-detection/by_article_test.html}{\includegraphics[width=\linewidth]{byarticle_test.png}}
+    \caption{Scattertext plot and top words for the original test set of the By Article dataset.}
+    \label{fig:byarticle_test}
+\end{figure*}
+
+\begin{figure*}[ht]
+    \centering
+    \href{https://juletx.github.io/hyperpartisan-news-detection/by_article_test.html}{\includegraphics[width=\linewidth]{byarticle_test_search.png}}
+    \caption{Scattertext search example of the term women in hyperpartisan and non-hyperpartisan documents.}
+    \label{fig:byarticle_test_search}
+\end{figure*}
+
+\begin{figure*}[ht]
+    \centering
+    \href{https://juletx.github.io/hyperpartisan-news-detection/by_article_test_clean.html}{\includegraphics[width=\linewidth]{byarticle_test_clean.png}}
+    \caption{Scattertext plot and top words for the cleaned test set of the By Article dataset.}
+    \label{fig:byarticle_test_clean}
+\end{figure*}
+
+\subsection{Log-odd Ratio}
+
+We get the most relevant words and bigrams from hyperpartisan and non-hyperpartisan articles by calculating their log-odd ratio.
+
+\subsubsection{Relevant Words}
+
+There are many differences betweeen the 50 most relevant words of
+hyperpartisan and non-hyperpartisan news. Here are the main findings of each class. Table \ref{tab:words_bigrams} shows all words and bigrams.
 
 Relevant words of hyperpartisan articles:
 
@@ -277,7 +299,7 @@ Relevant words of non-hyperpartisan articles:
 
 \subsubsection{Relevant Bigrams}
 
-There are many differences betweeen the 50 most relevant bigrams of
+There are many differences between the 50 most relevant bigrams of
 hyperpartisan and non-hyperpartisan news. Here are the main findings of each class. Table \ref{tab:words_bigrams} shows all words and bigrams.
 
 Relevant bigrams of hyperpartisan articles:
@@ -307,7 +329,7 @@ Relevant bigrams of non-hyperpartisan articles:
   travis county, austin). Some places are repeated a lot in different
   bigrams: china, us and texas are the most repeated ones.
 \item
-  Many economics related bigrams also appear a lot (emerging economies,
+  Economics related bigrams also appear a lot (emerging economies,
   exchange rate, emerging markets, direct investment, private
   investors\ldots).
 \item
@@ -320,74 +342,36 @@ Relevant bigrams of non-hyperpartisan articles:
 
 \subsection{Scattertext}
 
-We visualized the differences between hyperpartisan and non-hyperpartisan of the original text and cleaned text (before and after the preprocessing of the text mentionned in section \ref{Preprocessing}).
+We visualized the differences between hyperpartisan and non-hyperpartisan of the original text and cleaned text (before and after the preprocessing of the text mentioned in section \ref{Preprocessing}). Interactive versions of the scattertext images are available in GitHub Pages\footnote{\url{https://juletx.github.io/hyperpartisan-news-detection}}. Examples take a few minutes to load due to the size of the text corpus.
 
-\subsubsection{Original text}
+\subsubsection{Original Text}
 
-Most frequent words in both hyperpartisan articles are stopwords, and we can also see that in both cases some there are some non-words character sequences (= twsrc\%5etfw, type="external">august). We can see all the words and which of them appear most in hyperpartisan and non-hyperpartisan articles in Figure \ref{fig:byarticle_test}. 
+Most frequent words in both hyperpartisan articles are stopwords, and we can also see that in both cases some there are some non-words character sequences (= twsrc\%5etfw, type="external">august). We can see all the words and which of them appear most in hyperpartisan and non-hyperpartisan articles in Figure \ref{fig:byarticle_test}. Statistics for the number of words of each class are also shown, and we can see that hyperpartisan documents are on average longer than non-hyperpartisan ones. Click for an interactive version of the image.
 
-\begin{figure*}[ht]
-    \centering
-    \includegraphics[width=\linewidth]{byarticle_test.png}
-    \caption{Scattertext plot and top words for the original test set of the By Article dataset.}
-    \label{fig:byarticle_test}
-\end{figure*}
+Scattertext has also an option for searching terms and shows statistics and examples for each document category. For example, Figure \ref{fig:byarticle_test_search} shows the search result of the term women. We can see that it is used more in hyperpartisan documents than in non-hyperpartisan documents. Click for an interactive version of the image.
 
-\begin{figure*}[ht]
-    \centering
-    \includegraphics[width=\linewidth]{byarticle_test_search.png}
-    \caption{Scattertext search example of the term women in hyperpartisan and non-hyperpartisan documents.}
-    \label{fig:byarticle_test_search}
-\end{figure*}
+The relevant words of hyperpartisan articles are names of people and words of the political domain (donald trump, politics, republican, second amendment), names of countries (iranian, afghanistan) and topwords (it's, he's, does, that's)
 
-Relevant words of hyperpartisan articles:
-
-\begin{itemize}
-    \item Names of people and words of the political domain (donald trump, politics, republican, second amendment)
-    \item Names of countries (iranian, afghanistan)
-    \item Stopwords (it's, he's, does, that's)
-\end{itemize}
-
-Relevant words of non-hyperpartisan articles:
-
-\begin{itemize}
-    \item Words that doesn't seem to have any political connotation (dental, tooth, tooth regeneration). These words probably appear in the same articles, because they are all from the same field
-    \item Characters that don't form words (", | a, |)
-\end{itemize}
+Relevant words of non-hyperpartisan articles are words that doesn't seem to have any political connotation (dental, tooth, tooth regeneration). These words probably appear in the same articles, because they are all from the same field, and characters that don't form words (", $|$ a, $|$).
 
 Overall we see that this corpus needs to be cleaned, as there are a lot of stopwords and character sequences that doesn't form words (from URLs, for example). 
 
-\subsubsection{Clean text}
-By cleaning the text, we get better results, as the all the words we get for both top-hyperpartisan and non-hyperpartisan terms exists. We can see all the words and which of them appear most in hyperpartisan and non-hyperpartisan articles in Figure \ref{fig:byarticle_test_clean}.
- 
-\begin{figure*}[ht]
-    \centering
-    \includegraphics[width=\linewidth]{byarticle_test_clean.png}
-    \caption{Scattertext plot and top words for the cleaned test set of the By Article dataset.}
-    \label{fig:byarticle_test_clean}
-\end{figure*}
+\subsubsection{Clean Text}
+By cleaning the text, we get better results, as the all the words we get for both top-hyperpartisan and non-hyperpartisan terms exists. We can see all the words and which of them appear most in hyperpartisan and non-hyperpartisan articles in Figure \ref{fig:byarticle_test_clean}. If we look at the word counts, we can see that the number of words has decreased a lot by cleaning the text. Click for an interactive version of the image.
 
-Relevant words of hyperpartisan articles:
+Relevant words of hyperpartisan articles are words related to politics and organizations (republican, cia, isis, jihad). People's names (damore, wictor). Names of countries (iranian, afghanistan).
 
-\begin{itemize}
-    \item Words related to politics and organizations (republican, cia, isis, jihad)
-    \item People's names (damore, wictor) 
-    \item Names of countries (iranian, afghanistan)
-\end{itemize}
+Relevant words of non-hyperpartisan articles are words related to the institutions (votes, flag, police, officers, constabulary). As in the original text, words that doesn't seem to have any political connotation (dental, tooth, tooth regeneration, august).
 
-
-Relevant words of non-hyperpartisan articles:
-
-\begin{itemize}
-    \item Words related to the institutions (votes, flag, police, officers, constabulary)
-    \item As in the original text, words that doesn't seem to have any political connotation (dental, tooth, tooth regeneration, august)
-\end{itemize}
-
-If we compare the results of Figures \ref{fig:byarticle_test} and \ref{fig:byarticle_test_clean}), we can see that words from the cleaned corpus also appear in the original ones, and for most of them in the same place. And if we look at the more characteristic words of the whole corpus, we see that they are almost the same, and they usually have political connotation (trump, obama, antifa, supremacist, neonazi...).
+If we compare the results of Figures \ref{fig:byarticle_test} and \ref{fig:byarticle_test_clean}, we can see that words from the cleaned corpus also appear in the original ones, and for most of them in the same place. And if we look at the more characteristic words of the whole corpus, we see that they are almost the same, and they usually have political connotation (trump, obama, antifa, supremacist, neonazi...).
 
 \section{Conclusions}
 
-We saw that with both methods, we got similar results, we find almost the same words classified as hyperpartisan and non-hyperpartisan, but the visualization with Scattertext makes the results more readable. 
+We got similar results with both methods, we find almost the same words classified as relevant hyperpartisan and non-hyperpartisan. Using log-odd ratios we explicitly separate unigram and bigrams and that allows us to compare which are the relevant words in each case. 
+
+With the same dataset, even if we use the original data or the cleaned dataset, we got similar words classified as hyperpartisan and non-hyperpartisan, using different methods for this classification. Cleaning the text helps to remove some irrelevent words. 
+
+However, we have to take into account that as we clean the text before making bigrams, some bigrams may be "unreal", because there could have been a stopword between the two words that form the bigram. There is a little loss of information, but the bigrams are more relevant than if we keep the stopwords. However, the visualization with Scattertext makes the results more readable, and gives the possibility to retrieve some of the mentions for each word.
 
 \bibliography{hyperpartisan_news_detection}
 \bibliographystyle{acl_natbib}
