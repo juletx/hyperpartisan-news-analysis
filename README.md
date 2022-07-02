@@ -14,7 +14,7 @@ We visualized the differences between hyperpartisan and non-hyperpartisan of the
 
 Most frequent words in both hyperpartisan articles are stopwords, and we can also see that in both cases some there are some non-words character sequences (= twsrc\%5etfw, type="external">august). We can see all the words and which of them appear most in hyperpartisan and non-hyperpartisan articles in the next figure. Click for an interactive version.
 
-[![by_article_test.html](images/byarticle_test.png)](https://juletx.github.io/hyperpartisan-news-detection/by_article_test.html)
+[![by_article_test.html](images/byarticle_test.png)](https://juletx.github.io/hyperpartisan-news-analysis/by_article_test.html)
 
 Overall we see that this corpus needs to be cleaned, as there are a lot of stopwords and character sequences that doesn't form words (from URLs, for example).
 
@@ -22,6 +22,6 @@ Overall we see that this corpus needs to be cleaned, as there are a lot of stopw
 
 By cleaning the text, we get better results, as the all the words we get for both top-hyperpartisan and non-hyperpartisan terms exists. We can see all the words and which of them appear most in hyperpartisan and non-hyperpartisan articles in the next figure. Click for an interactive version.
 
-[![by_article_test_clean.html](images/byarticle_test_clean.png)](https://juletx.github.io/hyperpartisan-news-detection/by_article_test_clean.html)
+[![by_article_test_clean.html](images/byarticle_test_clean.png)](https://juletx.github.io/hyperpartisan-news-analysis/by_article_test_clean.html)
 
 If we compare the results of both figures, we can see that words from the cleaned corpus also appear in the original ones, and for most of them in the same place. And if we look at the more characteristic words of the whole corpus, we see that they are almost the same, and they usually have political connotation (trump, obama, antifa, supremacist, neonazi...).
